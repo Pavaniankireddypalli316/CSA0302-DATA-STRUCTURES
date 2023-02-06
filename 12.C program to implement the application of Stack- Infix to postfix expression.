@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX_SIZE 100
+
+char stack[MAX_SIZE];
+int top = -1;
+
+int priority(char symbol) {
+  switch (symbol) {
+    case '(':
+      return 0;
+    case '+':
+    case '-':
+      return 1;
+    case '*':
+    case '/':
+      return 2;
+    case '^':
+      return 3;
+  }
+  return 0;
+}
+
+void push(char symbol) {
+  if (top == MAX_SIZE - 1) {
+    printf("Error: Stack overflow\n");
+    return;
+  }
+  stack[++top] = symbol;
+}
+
+char pop() {
+  if (top == -1) {
+    printf("Error: Stack underflow\n");
+    return '\0';
+  }
+  return stack[top--];
+}
+
+int is_empty() {
+  return top == -1;
+}
+
+char peek() {
+  if (top == -1) {
+    printf("Error: Stack is empty\n");
+    return '\0';
+  }
+  return stack[top];
+}
+
+void infix_to_postfix(char infix[], char postfix[]) {
+  int i, j;
+  char symbol;
+  for (i = 0, j = 0; infix[i] != '\0'; i++) {
+    symbol = infix[i];
+    if (isalnum(symbol)) {
+      postfix[j++] = symbol;
+    } else if (symbol == '(') {
+      push(symbol);
+    } else if (symbol == ')') {
+      while (peek() != '(') {
+        postfix[j++] = pop();
+      }
+      pop();
+    } else {
+      while (!is_empty() && priority(peek()) >= priority(symbol)) {
+        postfix[j++] = pop();
+      }
+      push(symbol);
+    }
+  }
+  while (!is_empty()) {
+    postfix[j++] = pop();
+  }
+  postfix[j] = '\0';
+}
+
+int main() {
+  char infix[MAX_SIZE];
+  char postfix[MAX_SIZE];
+  printf("Enter an infix expression: ");
+  scanf("%s", infix);
+  infix_to_postfix(infix, postfix);
+  printf("Postfix expression: %s\n", postfix);
+  return 0;
+}
